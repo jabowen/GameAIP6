@@ -72,7 +72,8 @@ class Individual_Grid(object):
         right = width - 1
         for y in range(height):
             for x in range(left, right):
-                pass
+                if(random.randint(0,500)<2):
+                    genome[y][x] = random.choice(options)
         return genome
 
     # Create zero or more children from self and other
@@ -82,12 +83,15 @@ class Individual_Grid(object):
         # do crossover with other
         left = 1
         right = width - 1
+        choices = [self,other]
         for y in range(height):
             for x in range(left, right):
                 # STUDENT Which one should you take?  Self, or other?  Why?
                 # STUDENT consider putting more constraints on this to prevent pipes in the air, etc
-                pass
+                choice=random.randint(0,1)
+                new_genome[y][x] = choices[choice].genome[y][x]
         # do mutation; note we're returning a one-element tuple here
+        new_genome = self.mutate(new_genome)
         return (Individual_Grid(new_genome),)
 
     # Turn the genome into a level string (easy for this genome)
@@ -348,8 +352,8 @@ def generate_successors(population):
     #print(generate_children())
     # STUDENT Design and implement this
     # Hint: Call generate_children() on some individuals and fill up results.
-    while(len(population)>1):
-        parent1=population.pop(0)
+    parent1=population.pop(0)
+    while(len(population)>0):
         parent2=population.pop(0)
         results.append(parent1.generate_children(parent2)[0])
         results.append(parent2.generate_children(parent1)[0])
@@ -409,7 +413,7 @@ def ga():
                                            batch_size)
                 popdone = time.time()
                 print("Calculated fitnesses in:", popdone - gendone, "seconds")
-                population = next_population
+                population = final_gen = sorted(next_population, key=Individual.fitness, reverse=True)
         except KeyboardInterrupt:
             pass
     return population
