@@ -72,25 +72,33 @@ class Individual_Grid(object):
         right = width - 1
         for y in range(height):
             for x in range(left, right):
-                pass
+                if y>0 and new_genome[y-1][x] == "|" or new_genome[y-1][x] == 'T':
+                    new_genome[y][x] = "|"
+                    continue
+                if(random.randint(0,500)<2):
+                    genome[y][x] = random.choice(options)
         return genome
 
     # Create zero or more children from self and other
     def generate_children(self, other):
         new_genome = copy.deepcopy(self.genome)
-        other_genome = other.genome
         # Leaving first and last columns alone...
         # do crossover with other
         left = 1
         right = width - 1
+        choices = [self,other]
         for y in range(height):
             for x in range(left, right):
                 # STUDENT Which one should you take?  Self, or other?  Why?
                 # STUDENT consider putting more constraints on this to prevent pipes in the air, etc
-                if random.random() < 0.5:
-                    new_genome[y][x] = other_genome[y][x]
+                if y>0 and new_genome[y-1][x] == "|" or new_genome[y-1][x] == 'T':
+                    new_genome[y][x] = "|"
+                    continue
+                choice=random.randint(0,1)
+                new_genome[y][x] = choices[choice].genome[y][x]
 
         # do mutation; note we're returning a one-element tuple here
+        new_genome = self.mutate(new_genome)
         return (Individual_Grid(new_genome),)
 
     # Turn the genome into a level string (easy for this genome)
@@ -349,15 +357,22 @@ Individual = Individual_Grid
 def generate_successors(population):
     results = []
     #elitist selction
-    sorted_ppl = sorted(population, key=Individual.fitness)
-    survivor_count = 20
+    '''
+    sorted_ppl = sorted(population, key=Individual.fitness, reverse = True)
+    survivor_count = 100
     survivors = sorted_ppl[:survivor_count]
+    parent1=survivors.pop(0)
 
     while(len(survivors)>1):
-        parent1=survivors.pop(0)
-        for parent2 in survivors:
-            results.append(parent1.generate_children(parent2)[0])
+        parent2=survivors.pop(0)
+        results.append(parent1.generate_children(parent2)[0])
+        results.append(parent2.generate_children(parent1)[0])
+        parent1 = parent2
 
+    while(len(results)<len(population)):
+        results.append(Individual.random_individual() if random.random() < 0.9
+                      else Individual.empty_individual())
+                      '''
 
     #print(generate_children())
     # STUDENT Design and implement this
@@ -370,7 +385,7 @@ def generate_successors(population):
         parent2=population.pop(0)
         results.append(parent1.generate_children(parent2)[0])
         results.append(parent2.generate_children(parent1)[0])
-    '''
+        '''
     return results
 
 
@@ -413,7 +428,7 @@ def ga():
                             f.write("".join(row) + "\n")
                 generation += 1
                 # STUDENT Determine stopping condition
-                stop_condition = (generation>5)
+                stop_condition = (generation>10)
                 if stop_condition:
                     break
                 # STUDENT Also consider using FI-2POP as in the Sorenson & Pasquier paper
