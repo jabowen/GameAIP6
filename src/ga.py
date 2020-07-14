@@ -62,6 +62,27 @@ class Individual_Grid(object):
             self.calculate_fitness()
         return self._fitness
 
+    # swap all the floating pipe segments with the last item in a place can be  a pipe base.
+    # swap all the floating pipe segments with the non_pipe_segment closed to the ground in the same column
+    def fix_floating_pipes(self, genome):
+
+        pipeOptions = ["|","T"]
+        platforms = ["X", "?", "M", "B"]
+        left = 1
+        right = width - 1
+        for x in range(left, right):
+            last_platform = height-1
+            for y in range(height-1, -1, -1):
+                if genome[y][x] in platforms or y == 0:
+                    if genome[last_platform][x] == '|':
+                        genome[last_platform][x] = 'T'
+                    last_platform = y
+                elif genome[y][x] in pipeOptions:
+                    last_platform-=1
+                    genome[y][x] = genome[last_platform][x]
+                    genome[last_platform][x] = '|'
+        return genome
+
     # Mutate a genome into a new genome.  Note that this is a _genome_, not an individual!
     def mutate(self, genome):
         # STUDENT implement a mutation operator, also consider not mutating this individual
@@ -74,16 +95,15 @@ class Individual_Grid(object):
         noPipeOptions = list.copy(options)
         noPipeOptions.remove("|")
         noPipeOptions.remove("T")
+        groundOptions = ["X", "-"]
         for y in range(height):
             for x in range(left, right):
                 if(random.randint(0,500)<2):
-                    if(y==1):
-                        genome[y][x] = random.choice(options)
-                    elif(genome[y-1][x]=="|"):
-                        genome[y][x] = random.choice(pipeOptions)
+                    if y==15:
+                        genome[y][x] = random.choice(groundOptions)
                     else:
                         genome[y][x] = random.choice(noPipeOptions)
-                        
+
         return genome
 
     # Create zero or more children from self and other
@@ -94,12 +114,28 @@ class Individual_Grid(object):
         left = 1
         right = width - 1
         choices = [self,other]
+        pipeOptions = ["|","T"]
+        platforms = ["X", "?", "M", "B", '|']
         for y in range(height):
             for x in range(left, right):
                 # STUDENT Which one should you take?  Self, or other?  Why?
                 # STUDENT consider putting more constraints on this to prevent pipes in the air, etc
                 choice=random.randint(0,1)
                 new_genome[y][x] = choices[choice].genome[y][x]
+                #eliminates floating pipes by either creating a platform or deleting them
+                if y>0:
+                    if new_genome[y-1][x] in pipeOptions and new_genome[y][x] not in platforms:
+                        if new_genome[y][x] == 'T' :  #change pipe top to pipe body
+                            new_genome[y][x] = '|'
+                        elif random.random()<0.5:
+                            new_genome[y-1][x] = '-'   #delete
+                        else:
+                            new_genome[y][x] = random.choice(platforms)    #create a flatform
+                    # change pipe body to pipe top
+                    if new_genome[y-1][x] not in pipeOptions  and new_genome[y][x] == '|' :
+                        new_genome[y][x] = 'T'
+
+
         # do mutation; note we're returning a one-element tuple here
         new_genome = self.mutate(new_genome)
         return (Individual_Grid(new_genome),)
