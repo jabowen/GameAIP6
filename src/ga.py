@@ -87,8 +87,8 @@ class Individual_Grid(object):
             for x in range(left, right):
                 # STUDENT Which one should you take?  Self, or other?  Why?
                 # STUDENT consider putting more constraints on this to prevent pipes in the air, etc
-                if random.random < 0.5:
-                    new_genome[x][y] = other_genome[x][y]
+                if random.random() < 0.5:
+                    new_genome[y][x] = other_genome[y][x]
 
         # do mutation; note we're returning a one-element tuple here
         return (Individual_Grid(new_genome),)
@@ -349,9 +349,9 @@ Individual = Individual_Grid
 def generate_successors(population):
     results = []
     #elitist selction
-    sorted = sort(population, key=lambda individual: individual.calculate_fitness())
+    sorted_ppl = sorted(population, key=Individual.fitness)
     survivor_count = 20
-    survivors = survivor[:survivor_count]
+    survivors = sorted_ppl[:survivor_count]
 
     while(len(survivors)>1):
         parent1=survivors.pop(0)
