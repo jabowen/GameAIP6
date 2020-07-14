@@ -47,10 +47,10 @@ class Individual_Grid(object):
         coefficients = dict(
             meaningfulJumpVariance=0.5,
             negativeSpace=0.6,
-            pathPercentage=0.5,
-            emptyPercentage=0.6,
+            pathPercentage=1,
+            emptyPercentage=2,
             linearity=-0.5,
-            solvability=2.0
+            solvability=20.0
         )
         self._fitness = sum(map(lambda m: coefficients[m] * measurements[m],
                                 coefficients))
@@ -412,7 +412,7 @@ def ga():
                             f.write("".join(row) + "\n")
                 generation += 1
                 # STUDENT Determine stopping condition
-                stop_condition = (generation>20)
+                stop_condition = (generation>10)
                 if stop_condition:
                     break
                 # STUDENT Also consider using FI-2POP as in the Sorenson & Pasquier paper
