@@ -70,10 +70,20 @@ class Individual_Grid(object):
 
         left = 1
         right = width - 1
+        pipeOptions = ["|","T"]
+        noPipeOptions = list.copy(options)
+        noPipeOptions.remove("|")
+        noPipeOptions.remove("T")
         for y in range(height):
             for x in range(left, right):
                 if(random.randint(0,500)<2):
-                    genome[y][x] = random.choice(options)
+                    if(y==1):
+                        genome[y][x] = random.choice(options)
+                    elif(genome[y-1][x]=="|"):
+                        genome[y][x] = random.choice(pipeOptions)
+                    else:
+                        genome[y][x] = random.choice(noPipeOptions)
+                        
         return genome
 
     # Create zero or more children from self and other
@@ -352,11 +362,13 @@ def generate_successors(population):
     #print(generate_children())
     # STUDENT Design and implement this
     # Hint: Call generate_children() on some individuals and fill up results.
-    while(len(population)>0):
-        parent1=population.pop(0)
+    parent1=population.pop(0)
+    while(len(population)>2):
         parent2=population.pop(0)
+        parent3=population.pop(random.randint(0,len(population)-1))
         results.append(parent1.generate_children(parent2)[0])
-        results.append(parent2.generate_children(parent1)[0])
+        results.append(parent1.generate_children(parent3)[0])
+        results.append(parent2.generate_children(parent3)[0])
     return results
 
 
@@ -400,7 +412,7 @@ def ga():
                             f.write("".join(row) + "\n")
                 generation += 1
                 # STUDENT Determine stopping condition
-                stop_condition = (generation>5)
+                stop_condition = (generation>10)
                 if stop_condition:
                     break
                 # STUDENT Also consider using FI-2POP as in the Sorenson & Pasquier paper
@@ -413,7 +425,6 @@ def ga():
                                            next_population,
                                            batch_size)
                 popdone = time.time()
-                print(len(next_population))
                 print("Calculated fitnesses in:", popdone - gendone, "seconds")
                 population = sorted(next_population, key=Individual.fitness, reverse=True)
                 if(len(population)>pop_limit):
