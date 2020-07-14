@@ -78,6 +78,7 @@ class Individual_Grid(object):
     # Create zero or more children from self and other
     def generate_children(self, other):
         new_genome = copy.deepcopy(self.genome)
+        other_genome = other.genome
         # Leaving first and last columns alone...
         # do crossover with other
         left = 1
@@ -86,7 +87,9 @@ class Individual_Grid(object):
             for x in range(left, right):
                 # STUDENT Which one should you take?  Self, or other?  Why?
                 # STUDENT consider putting more constraints on this to prevent pipes in the air, etc
-                pass
+                if random.random < 0.5:
+                    new_genome[x][y] = other_genome[x][y]
+
         # do mutation; note we're returning a one-element tuple here
         return (Individual_Grid(new_genome),)
 
@@ -345,14 +348,29 @@ Individual = Individual_Grid
 
 def generate_successors(population):
     results = []
+    #elitist selction
+    sorted = sort(population, key=lambda individual: individual.calculate_fitness())
+    survivor_count = 20
+    survivors = survivor[:survivor_count]
+
+    while(len(survivors)>1):
+        parent1=survivors.pop(0)
+        for parent2 in survivors:
+            results.append(parent1.generate_children(parent2)[0])
+
+
     #print(generate_children())
     # STUDENT Design and implement this
     # Hint: Call generate_children() on some individuals and fill up results.
+
+    #no selection
+    '''
     while(len(population)>1):
         parent1=population.pop(0)
         parent2=population.pop(0)
         results.append(parent1.generate_children(parent2)[0])
         results.append(parent2.generate_children(parent1)[0])
+    '''
     return results
 
 
