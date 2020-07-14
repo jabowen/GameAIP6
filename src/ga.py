@@ -352,8 +352,8 @@ def generate_successors(population):
     #print(generate_children())
     # STUDENT Design and implement this
     # Hint: Call generate_children() on some individuals and fill up results.
-    parent1=population.pop(0)
     while(len(population)>0):
+        parent1=population.pop(0)
         parent2=population.pop(0)
         results.append(parent1.generate_children(parent2)[0])
         results.append(parent2.generate_children(parent1)[0])
@@ -383,6 +383,7 @@ def ga():
         generation = 0
         start = time.time()
         now = start
+        population = sorted(population, key=Individual.fitness, reverse=True)
         print("Use ctrl-c to terminate this loop manually.")
         try:
             while True:
@@ -412,8 +413,11 @@ def ga():
                                            next_population,
                                            batch_size)
                 popdone = time.time()
+                print(len(next_population))
                 print("Calculated fitnesses in:", popdone - gendone, "seconds")
-                population = final_gen = sorted(next_population, key=Individual.fitness, reverse=True)
+                population = sorted(next_population, key=Individual.fitness, reverse=True)
+                if(len(population)>pop_limit):
+                    population=population[:pop_limit]
         except KeyboardInterrupt:
             pass
     return population
