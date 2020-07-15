@@ -10,5 +10,5 @@ if __name__ == "__main__":
     if not os.path.exists(path):
         print("The file at " + path + " does not exist.")
         exit(1)
-    shutil.copy(path, "Player/Assets/Resources/Levels/Level1.txt")
+    shutil.copy(path, "Player_2019_2/Assets/Resources/Levels/Level1.txt")
     print("Finished!")

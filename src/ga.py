@@ -47,8 +47,8 @@ class Individual_Grid(object):
         coefficients = dict(
             meaningfulJumpVariance=0.5,
             negativeSpace=0.6,
-            pathPercentage=1,
-            emptyPercentage=2,
+            pathPercentage=1.0,
+            emptyPercentage=2.0,
             linearity=-0.5,
             solvability=20.0
         )
@@ -111,6 +111,8 @@ class Individual_Grid(object):
         new_genome = copy.deepcopy(self.genome)
         # Leaving first and last columns alone...
         # do crossover with other
+        if(len(self.genome)==0 or len(other.genome)==0):
+            print("empty")
         left = 1
         right = width - 1
         choices = [self,other]
@@ -211,9 +213,9 @@ class Individual_DE(object):
             meaningfulJumpVariance=0.5,
             negativeSpace=0.6,
             pathPercentage=0.5,
-            emptyPercentage=0.6,
+            emptyPercentage=0.2,
             linearity=-0.5,
-            solvability=2.0
+            solvability=20.0
         )
         penalties = 0
         # STUDENT For example, too many stairs are unaesthetic.  Let's penalize that
@@ -232,7 +234,7 @@ class Individual_DE(object):
     def mutate(self, new_genome):
         # STUDENT How does this work?  Explain it in your writeup.
         # STUDENT consider putting more constraints on this, to prevent generating weird things
-        if random.random() < 0.1 and len(new_genome) > 0:
+        if random.random() < 0.8 and len(new_genome) > 0:
             to_change = random.randint(0, len(new_genome) - 1)
             de = new_genome[to_change]
             new_de = de
@@ -268,17 +270,17 @@ class Individual_DE(object):
                 new_de = (x, de_type, y)
             elif de_type == "7_pipe":
                 h = de[2]
-                if choice < 0.5:
+                if choice < 0.6:
                     x = offset_by_upto(x, width / 8, min=1, max=width - 2)
                 else:
-                    h = offset_by_upto(h, 2, min=2, max=height - 4)
+                    h = offset_by_upto(h, 2, min=0, max=height - 4)
                 new_de = (x, de_type, h)
             elif de_type == "0_hole":
                 w = de[2]
                 if choice < 0.5:
                     x = offset_by_upto(x, width / 8, min=1, max=width - 2)
                 else:
-                    w = offset_by_upto(w, 4, min=1, max=width - 2)
+                    w = offset_by_upto(w, 4, min=0, max=2)
                 new_de = (x, de_type, w)
             elif de_type == "6_stairs":
                 h = de[2]
@@ -286,7 +288,7 @@ class Individual_DE(object):
                 if choice < 0.33:
                     x = offset_by_upto(x, width / 8, min=1, max=width - 2)
                 elif choice < 0.66:
-                    h = offset_by_upto(h, 8, min=1, max=height - 4)
+                    h = offset_by_upto(h, 8, min=0, max=2)
                 else:
                     dx = -dx
                 new_de = (x, de_type, h, dx)
@@ -390,7 +392,7 @@ class Individual_DE(object):
         return Individual_DE(g)
 
 
-Individual = Individual_Grid
+Individual = Individual_DE
 
 
 def generate_successors(population):
@@ -412,6 +414,10 @@ def ga():
     # STUDENT Feel free to play with this parameter
     pop_limit = 480
     # Code to parallelize some computations
+    if(Individual==Individual_Grid):
+        empty = .9
+    else:
+        empty = 1.9
     batches = os.cpu_count()
     if pop_limit % batches != 0:
         print("It's ideal if pop_limit divides evenly into " + str(batches) + " batches.")
@@ -419,7 +425,7 @@ def ga():
     with mpool.Pool(processes=os.cpu_count()) as pool:
         init_time = time.time()
         # STUDENT (Optional) change population initialization
-        population = [Individual.random_individual() if random.random() < 0.9
+        population = [Individual.random_individual() if random.random() < empty
                       else Individual.empty_individual()
                       for _g in range(pop_limit)]
         # But leave this line alone; we have to reassign to population because we get a new population that has more cached stuff in it.
@@ -448,7 +454,7 @@ def ga():
                             f.write("".join(row) + "\n")
                 generation += 1
                 # STUDENT Determine stopping condition
-                stop_condition = (generation>10)
+                stop_condition = (generation>5)
                 if stop_condition:
                     break
                 # STUDENT Also consider using FI-2POP as in the Sorenson & Pasquier paper

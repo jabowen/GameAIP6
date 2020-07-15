@@ -1,0 +1,5 @@
+sceneSetups:
+- path: C:/Users/rbowe/OneDrive/Documents/GitHub/GameAIP6/src/Player_2019_2/Assets/Scenes/GameWorldScene.unity
+  isLoaded: 1
+  isActive: 1
+  isSubScene: 0
